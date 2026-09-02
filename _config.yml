@@ -1,0 +1,12 @@
+theme: jekyll-theme-primer
+source: .
+destination: ./_site
+exclude:
+  - node_modules
+  - package.json
+  - package-lock.json
+  - vite.config.js
+  - tailwind.config.js
+  - postcss.config.js
+  - "*.jsx"
+  - .github
