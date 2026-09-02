@@ -5,7 +5,7 @@ import {
   CheckCircle2, XCircle, Sun, Battery, Gauge, Radio, Cloud, Cpu, Server, Wifi, WifiOff, Thermometer,
   Waves, Layers, ShieldCheck, ShieldAlert, PlayCircle, RotateCcw, TrendingUp, TrendingDown, Minus,
   Download, FileText, CircleDot, SlidersHorizontal, Calendar, ArrowDown, BadgeCheck, AlertOctagon,
-  PlugZap, Signal
+  PlugZap, Signal, ArrowRight, ChevronLeft, Eye, Filter, Sparkles, Smartphone, Check, ZoomIn, ZoomOut, PauseCircle, Search, Maximize2, Minimize2, ExternalLink
 } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area, XAxis, YAxis,
@@ -1353,43 +1353,1214 @@ function SettingsPage({ dataMode, setDataMode }) {
 }
 
 /* =========================================================================
-   PAGE: ARCHITECTURE
+   PAGE: ARCHITECTURE (AquaPulse Website Reactive Flowchart Architecture)
    ========================================================================= */
 
-function ArchitecturePage() {
-  const steps = [
-    { label: "Water Source", icon: Droplets },
-    { label: "pH / Turbidity / TDS / Temperature Sensors", icon: Gauge },
-    { label: "ESP32 / STM32 Controller", icon: Cpu },
-    { label: "Pump + Solenoid Valves", icon: SlidersHorizontal },
-    { label: "Sediment Filter", icon: SlidersHorizontal },
-    { label: "Activated Carbon", icon: CircleDot },
-    { label: "UF / RO", icon: Layers },
-    { label: "UV Disinfection", icon: ShieldCheck },
-    { label: "Post-Treatment Sensors", icon: Gauge },
-    { label: "Communication — Wi-Fi / GSM / LoRa", icon: Signal },
-    { label: "Cloud Database", icon: Cloud },
-    { label: "Dashboard", icon: LineChartIcon },
-    { label: "Alerts / Notifications", icon: Bell },
-  ];
+/* =========================================================================
+   PAGE: ARCHITECTURE (AquaPulse End-to-End System Architecture)
+   ========================================================================= */
+
+const ARCHITECTURE_TOPICS = [
+  {
+    id: "water_source",
+    index: 1,
+    title: "Water Source",
+    shortTitle: "Water Source",
+    lines: ["1. Water Source", "(Raw Intake / 65 PSI)"],
+    category: "Intake & Inflow",
+    icon: Droplets,
+    color: "blue",
+    statusText: "Active Inflow (65 PSI)",
+    statusType: "normal",
+    page: "purification",
+    pageLabel: "Purification Page",
+    codeRef: "PurificationPage.jsx / RawIntake",
+    description: "Raw groundwater, borewell, or mining runoff intake from rural catchment areas. Baseline typically contains suspended silt, dissolved minerals, and seasonal runoff turbidity.",
+    inputs: ["Aquifer groundwater", "Mining runoff catchment", "Seasonal monsoon recharge"],
+    outputs: ["Pressurized raw inflow (pH ~6.3, TDS ~920 ppm, Turbidity ~18 NTU)"],
+    techSpecs: "Submersible pump intake · 65 PSI feed · High-turbidity baseline",
+  },
+  {
+    id: "pre_sensors",
+    index: 2,
+    title: "pH / Turbidity / TDS / Temperature Sensors",
+    shortTitle: "Pre-Treatment Sensors",
+    lines: ["2. Pre-Treatment Sensors", "pH · Turb · TDS · Temp"],
+    category: "IoT Sensing Array",
+    icon: Activity,
+    color: "cyan",
+    statusText: "Continuous Polling (10s)",
+    statusType: "normal",
+    page: "live",
+    pageLabel: "Live Monitoring Page",
+    codeRef: "LiveMonitoringPage.jsx / PARAM_META",
+    description: "Industrial analog and optical probes installed directly into the raw intake manifold to monitor water chemistry prior to purification and determine necessary filtration intensity.",
+    inputs: ["Pressurized raw intake stream"],
+    outputs: ["Analog voltage signals (0-5V / 4-20mA)", "Raw parameter telemetry vectors", "Threshold alert flags"],
+    techSpecs: "Analog pH probe (E-201-C) · Optical Turbidity · Titanium TDS electrode · DS18B20 Temp",
+  },
+  {
+    id: "controller",
+    index: 3,
+    title: "ESP32 / STM32 Controller",
+    shortTitle: "ESP32 / STM32",
+    lines: ["3. ESP32 / STM32 Controller", "Dual-Core Edge Compute"],
+    category: "Edge Computing",
+    icon: Cpu,
+    color: "indigo",
+    statusText: "160 MHz Dual-Core Online",
+    statusType: "normal",
+    page: "settings",
+    pageLabel: "System Settings",
+    codeRef: "simulationEngine.js / EdgeMCU",
+    description: "Central industrial microcontroller running FreeRTOS. Executes multi-channel ADC sampling, digital Kalman filtering, automatic solenoid interlock logic, and power-saving sleep schedules.",
+    inputs: ["Pre/Post-treatment sensor signals", "Solar battery voltage & SoC", "Manual operator overrides"],
+    outputs: ["Relay actuation triggers (GPIO)", "Filtered sensor telemetry frames", "Emergency safety shutoff"],
+    techSpecs: "ESP32-WROOM-32D / STM32F401 · 240MHz · 520KB SRAM · Hardware Cryptographic Acceleration",
+  },
+  {
+    id: "pump_valves",
+    index: 4,
+    title: "Pump + Solenoid Valves",
+    shortTitle: "Pump & Solenoids",
+    lines: ["4. Pump + Solenoid Valves", "Automated Flow Control"],
+    category: "Hydraulic Actuation",
+    icon: SlidersHorizontal,
+    color: "amber",
+    statusText: "12V Booster Active · Valves Armed",
+    statusType: "normal",
+    page: "purification",
+    pageLabel: "Purification Controls",
+    codeRef: "PurificationPage.jsx / STAGES",
+    description: "12V DC diaphragm booster pump paired with food-grade brass solenoid valves. Regulates inlet pressure, sequences stage feed, executes automatic backwash cycles, and isolates lines during contamination.",
+    inputs: ["Raw water intake stream", "Controller relay trigger signals (12V DC / 4.5A)"],
+    outputs: ["Pressurized 65 PSI hydraulic stream", "Backwash discharge bypass", "Flow rate telemetry"],
+    techSpecs: "12V DC 4.5A Diaphragm Booster Pump · Normally-Closed Brass Solenoids · Overpressure Relief Valve",
+  },
+  {
+    id: "sediment_filter",
+    index: 5,
+    title: "Sediment Filter",
+    shortTitle: "Sediment Filter",
+    lines: ["5. Sediment Filter", "5μm Particulate Removal"],
+    category: "Physical Filtration (Stage 1)",
+    icon: Layers,
+    color: "blue",
+    statusText: "94% Health · 5-Micron Active",
+    statusType: "normal",
+    page: "filters",
+    pageLabel: "Filter Health Page",
+    codeRef: "FilterHealthPage.jsx / FILTER_STAGES[0]",
+    description: "5-micron spun polypropylene melt-blown depth filter. Traps suspended silt, sand grains, rust flakes, and clay particles from mine runoff to protect delicate downstream carbon and RO membranes.",
+    inputs: ["Pressurized raw inflow (Turbidity ~18 NTU)"],
+    outputs: ["Particulate-free filtrate (Turbidity <4 NTU)"],
+    techSpecs: "5-Micron Spun Polypropylene · 10\" Standard Cartridge · Differential Pressure Monitoring",
+  },
+  {
+    id: "activated_carbon",
+    index: 6,
+    title: "Activated Carbon",
+    shortTitle: "Activated Carbon",
+    lines: ["6. Activated Carbon", "CTO Adsorption & Odor"],
+    category: "Adsorption (Stage 2)",
+    icon: CircleDot,
+    color: "emerald",
+    statusText: "88% Health · CTO Block Active",
+    statusType: "normal",
+    page: "filters",
+    pageLabel: "Filter Health Page",
+    codeRef: "FilterHealthPage.jsx / FILTER_STAGES[1]",
+    description: "Acid-washed extruded coconut-shell carbon block (CTO). Adsorbs residual chlorine, volatile organic chemicals (VOCs), pesticide residues, unpleasant odor, and metallic tastes from mining runoff.",
+    inputs: ["Particulate-free filtrate stream"],
+    outputs: ["Dechlorinated, organic-free water stream (98% VOC reduction)"],
+    techSpecs: "High-Iodine Extruded Coconut Shell CTO · 10\" Carbon Core · 2.5 Bar Rated",
+  },
+  {
+    id: "uf_ro",
+    index: 7,
+    title: "UF / RO",
+    shortTitle: "UF / RO Membrane",
+    lines: ["7. UF / RO", "Heavy Metals & Dissolved Solids"],
+    category: "Membrane Separation (Stage 3)",
+    icon: Waves,
+    color: "cyan",
+    statusText: "79% Health · 95% Rejection",
+    statusType: "normal",
+    page: "purification",
+    pageLabel: "Purification Page",
+    codeRef: "PurificationPage.jsx / STAGES[2]",
+    description: "Dual-tier Ultrafiltration (0.01μm) hollow-fiber membrane and thin-film composite Reverse Osmosis (0.0001μm) element. Eliminates heavy metals (Arsenic, Lead, Chromium), fluorides, and cuts high TDS.",
+    inputs: ["Dechlorinated water at 65 PSI"],
+    outputs: ["Purified permeate (TDS: 110 ppm)", "Brine concentrate reject stream"],
+    techSpecs: "0.01μm UF Hollow Fiber + 0.0001μm Polyamide TFC RO Membrane · 75 GPD Rating",
+  },
+  {
+    id: "uv_disinfection",
+    index: 8,
+    title: "UV Disinfection",
+    shortTitle: "UV Disinfection",
+    lines: ["8. UV Disinfection", "254nm UV-C Sterilization"],
+    category: "Germicidal Inactivation (Stage 4)",
+    icon: ShieldCheck,
+    color: "purple",
+    statusText: "254nm UV-C Lamp Active (11W)",
+    statusType: "normal",
+    page: "purification",
+    pageLabel: "Purification Page",
+    codeRef: "PurificationPage.jsx / STAGES[3]",
+    description: "High-intensity stainless steel 304 reactor chamber with a quartz sleeve emitting 254nm germicidal UV-C rays. Inactivates 99.99% of bacteria, cysts, and viruses by disrupting DNA/RNA without chemicals.",
+    inputs: ["Permeate water stream", "12V to 230V AC ballast inverter feed"],
+    outputs: ["Biologically sterile, potable drinking water"],
+    techSpecs: "11W Low-Pressure Mercury Vapor Lamp · Quartz Sleeve · 30 mJ/cm² UV Fluence Rate",
+  },
+  {
+    id: "post_sensors",
+    index: 9,
+    title: "Post-Treatment Sensors",
+    shortTitle: "Post-Treatment Sensors",
+    lines: ["9. Post-Treatment Sensors", "Effluent Potability Validation"],
+    category: "Quality Verification",
+    icon: Gauge,
+    color: "emerald",
+    statusText: "Effluent Verified (BIS 10500:2012)",
+    statusType: "normal",
+    page: "live",
+    pageLabel: "Live Monitoring Page",
+    codeRef: "LiveMonitoringPage.jsx / treated",
+    description: "Second-stage analytical probe array validating potability at the tap: pH (7.2), TDS (110 ppm), Turbidity (0.4 NTU), Temp (22.8°C). Automatically seals the delivery valve if standards are breached.",
+    inputs: ["Sterilized effluent stream"],
+    outputs: ["Validated potability metrics", "Safety interlock pass/fail signal", "Compliance verification log"],
+    techSpecs: "Secondary pH probe · Secondary TDS electrode · Inline turbidimeter · BIS 10500 benchmark checks",
+  },
+  {
+    id: "communication",
+    index: 10,
+    title: "Communication — Wi-Fi / GSM / LoRa",
+    shortTitle: "Wi-Fi / GSM / LoRa",
+    lines: ["10. Communication", "Wi-Fi · GSM · LoRa"],
+    category: "Wireless Uplink",
+    icon: Radio,
+    color: "blue",
+    statusText: "Multi-Link Tri-Band Active",
+    statusType: "normal",
+    page: "devices",
+    pageLabel: "Devices & Fleet Locations",
+    codeRef: "DevicesPage.jsx / UNITS",
+    description: "Tri-band communication gateway with automatic fallback: 2.4GHz Wi-Fi for localized setups, 4G LTE/GSM SIM7600 modem for rural cellular coverage, and 865MHz LoRaWAN for off-grid mining camps.",
+    inputs: ["Serialized JSON telemetry frames from MCU"],
+    outputs: ["Encrypted MQTT/HTTPS data packets to cloud", "Over-the-air (OTA) firmware updates", "Remote valve control"],
+    techSpecs: "ESP32 Wi-Fi (802.11 b/g/n) · SIM7600EI 4G LTE Modem · SX1276 865MHz LoRaWAN Transceiver",
+  },
+  {
+    id: "cloud_database",
+    index: 11,
+    title: "Cloud Database",
+    shortTitle: "Cloud Database",
+    lines: ["11. Cloud Database", "TimescaleDB Telemetry Hub"],
+    category: "Cloud & Analytics",
+    icon: Cloud,
+    color: "indigo",
+    statusText: "TimescaleDB / Redis Live",
+    statusType: "normal",
+    page: "analytics",
+    pageLabel: "Analytics & Trends",
+    codeRef: "AnalyticsPage.jsx / TREND_DATA",
+    description: "High-throughput cloud time-series database. Ingests streaming telemetry, calculates moving averages, trains predictive filter degradation curves, and powers realtime WebSocket/SSE feeds.",
+    inputs: ["Encrypted MQTT packet streams from deployed hardware units"],
+    outputs: ["Historical time-series tables", "Moving averages & WQI indices", "REST API & SSE subscriber feeds"],
+    techSpecs: "TimescaleDB PostgreSQL Extension · Redis In-Memory Pub/Sub · Supabase Edge Functions",
+  },
+  {
+    id: "dashboard",
+    index: 12,
+    title: "Dashboard",
+    shortTitle: "Dashboard",
+    lines: ["12. Dashboard", "Real-Time Operator Console"],
+    category: "User Interface",
+    icon: LineChartIcon,
+    color: "blue",
+    statusText: "Live Interactive Client",
+    statusType: "normal",
+    page: "dashboard",
+    pageLabel: "Executive Dashboard",
+    codeRef: "DashboardPage.jsx / MetricCard",
+    description: "Unified web console for village water custodians and district engineers. Displays live gauges, 4-stage filter health, purification flow sequencing, energy status, and one-click compliance CSV export.",
+    inputs: ["Real-time Cloud Database SSE feed", "Global State React Hook"],
+    outputs: ["Interactive metric gauges", "Historical Recharts visualizations", "Audit reports & CSV downloads"],
+    techSpecs: "React 18 + Vite + Tailwind CSS · Recharts Time-Series · Responsive Mobile / Desktop Layout",
+  },
+  {
+    id: "alerts_notifications",
+    index: 13,
+    title: "Alerts / Notifications",
+    shortTitle: "Alerts & Notifications",
+    lines: ["13. Alerts / Notifications", "Autonomous Escalation & SMS"],
+    category: "Incident Escalation",
+    icon: Bell,
+    color: "red",
+    statusText: "Autonomous Escalation Armed",
+    statusType: "normal",
+    page: "alerts",
+    pageLabel: "Alerts & Incidents Page",
+    codeRef: "AlertsPage.jsx / INITIAL_ALERTS",
+    description: "Autonomous multi-tiered incident dispatcher. Classifies events (Critical, Warning, Info, Resolved), sends instant SMS alerts to local custodians, logs operator resolutions, and escalates to authorities.",
+    inputs: ["Water quality threshold breach events", "Filter cartridge lifespan warnings (<20%)", "Unit offline signals"],
+    outputs: ["SMS alerts to operators", "In-app notification queue", "Statutory compliance escalation records"],
+    techSpecs: "Twilio SMS Gateway · Web Push Notifications · Incident Acknowledgement & Resolution Audit Trail",
+  },
+];
+
+const ARCHITECTURE_TOPICS_MAP = ARCHITECTURE_TOPICS.reduce((acc, item) => {
+  acc[item.id] = item;
+  return acc;
+}, {});
+
+function ArchitecturePage({ onNavigate }) {
+  const [selectedTopicId, setSelectedTopicId] = useState(null);
+  const [viewMode, setViewMode] = useState("diagram"); // "diagram" | "pipeline"
+  const [isSimulating, setIsSimulating] = useState(true);
+  const [hoveredNodeId, setHoveredNodeId] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const selectedTopic = selectedTopicId ? ARCHITECTURE_TOPICS_MAP[selectedTopicId] : null;
+
   return (
-    <div>
-      <PageHeader eyebrow="System design" title="Technical Architecture" description="End-to-end data and water flow from source to alerting." />
-      <Card className="p-5 md:p-6">
-        <div className="space-y-0">
-          {steps.map((s, idx) => (
-            <div key={s.label}>
-              <div className="flex items-center gap-4 py-2">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                  <s.icon className="w-4 h-4 text-blue-800" />
-                </div>
-                <span className="text-sm font-medium text-slate-700">{s.label}</span>
-              </div>
-              {idx < steps.length - 1 && <div className="ml-5 border-l-2 border-dashed border-slate-200 h-4" />}
-            </div>
-          ))}
+    <div className={`space-y-4 transition-all duration-300 ${isExpanded ? "fixed inset-0 z-50 p-4 md:p-6 bg-slate-950 overflow-y-auto" : ""}`}>
+      {/* Top Header & Interactive Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-900/60 text-blue-400 border border-blue-800/80">
+              System Architecture
+            </span>
+            <span className="text-xs text-slate-400">AquaPulse · SIH26040 Clean &amp; Green Tech</span>
+          </div>
+          <h1 className="text-lg md:text-xl font-bold text-white tracking-tight mt-0.5">
+            Architecture
+          </h1>
+          <p className="text-xs text-slate-400 mt-0.5">
+            End-to-end data and water flow from source to alerting.
+          </p>
         </div>
-      </Card>
+
+        <div className="flex items-center flex-wrap gap-2 shrink-0">
+          {/* View Mode Switcher */}
+          <div className="inline-flex items-center p-1 rounded-xl bg-slate-800/90 border border-slate-700/80">
+            <button
+              onClick={() => setViewMode("diagram")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                viewMode === "diagram"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Workflow className="w-3.5 h-3.5" />
+              <span>Diagram View</span>
+            </button>
+            <button
+              onClick={() => setViewMode("pipeline")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                viewMode === "pipeline"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>13-Stage Pipeline</span>
+            </button>
+          </div>
+
+          {/* Simulation Toggle (for Diagram View) */}
+          {viewMode === "diagram" && (
+            <button
+              onClick={() => setIsSimulating((s) => !s)}
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                isSimulating
+                  ? "bg-emerald-950/70 border-emerald-500/60 text-emerald-300 hover:bg-emerald-900/70"
+                  : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+              }`}
+              title="Toggle live telemetry pulse animation along architecture connectors"
+            >
+              {isSimulating ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>Simulation Active</span>
+                </>
+              ) : (
+                <>
+                  <PlayCircle className="w-3.5 h-3.5" />
+                  <span>Simulate Flow</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Expand / Minimize button */}
+          <button
+            onClick={() => setIsExpanded((e) => !e)}
+            className="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+            title={isExpanded ? "Restore view" : "Maximize view"}
+          >
+            {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
+          {/* Reset Selection / Close button */}
+          {selectedTopicId && (
+            <button
+              onClick={() => setSelectedTopicId(null)}
+              className="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+              title="Clear selection"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* =========================================================================
+          VIEW MODE 1: INTERACTIVE FLOWCHART DIAGRAM (13 Topics Mapped in Topology)
+          ========================================================================= */}
+      {viewMode === "diagram" && (
+        <div className="relative rounded-2xl bg-[#0f1217] border border-slate-800 p-4 md:p-8 shadow-2xl overflow-hidden">
+          {/* Subtle grid background */}
+          <div
+            className="absolute inset-0 opacity-[0.04] pointer-events-none"
+            style={{
+              backgroundImage: "radial-gradient(#94a3b8 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+
+          {/* Top-right hint and close button */}
+          <div className="absolute top-4 right-4 z-10 flex items-center gap-2 text-slate-500">
+            <span className="text-[11px] font-mono hidden sm:inline-block">Click any topic node to inspect &amp; open</span>
+            {selectedTopicId && (
+              <button
+                onClick={() => setSelectedTopicId(null)}
+                className="w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-slate-700"
+                aria-label="Deselect"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* SVG Diagram Canvas */}
+          <div className="w-full overflow-x-auto">
+            <svg
+              viewBox="0 0 1160 560"
+              className="w-full min-w-[950px] h-auto block select-none"
+              style={{ fontSmooth: "always" }}
+            >
+              <defs>
+                {/* Standard Solid Arrowhead */}
+                <marker
+                  id="arrow"
+                  viewBox="0 0 10 10"
+                  refX="6"
+                  refY="5"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto-start-reverse"
+                >
+                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#94a3b8" />
+                </marker>
+
+                {/* Dashed Arrowhead */}
+                <marker
+                  id="arrow-dashed"
+                  viewBox="0 0 10 10"
+                  refX="6"
+                  refY="5"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto-start-reverse"
+                >
+                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#94a3b8" />
+                </marker>
+
+                {/* Node Glow Filter on Hover / Selected */}
+                <filter id="node-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#38bdf8" floodOpacity="0.6" />
+                </filter>
+              </defs>
+
+              {/* =========================================================================
+                  CONNECTING PATHS (Connecting all 13 topics in end-to-end water & data flow)
+                  ========================================================================= */}
+
+              {/* Path 1: Water Source -> Pre-Treatment Sensors */}
+              <path
+                id="path-source-sensors"
+                d="M 200 47 L 250 47"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 2: Pre-Treatment Sensors -> Pump + Solenoid Valves */}
+              <path
+                id="path-sensors-pump"
+                d="M 385 74 C 385 105, 310 100, 295 130"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 3: Pre-Treatment Sensors -> ESP32 / STM32 Controller */}
+              <path
+                id="path-sensors-controller"
+                d="M 520 47 L 570 47"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 4: ESP32 Controller -> Pump + Solenoid Valves (Dashed Actuation) */}
+              <path
+                id="path-controller-pump"
+                d="M 630 74 C 570 110, 450 110, 410 142"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                strokeDasharray="3 3"
+                markerEnd="url(#arrow-dashed)"
+              />
+              <g className="cursor-default">
+                <text x="515" y="112" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Solenoid &amp; Pump Relays
+                </text>
+              </g>
+
+              {/* Path 5: ESP32 Controller -> Communication */}
+              <path
+                id="path-controller-comm"
+                d="M 810 47 L 860 47"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 6: Communication -> Cloud Database */}
+              <path
+                id="path-comm-cloud"
+                d="M 997 74 L 997 130"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 7: Pump + Solenoid Valves -> 5. Sediment Filter */}
+              <path
+                id="path-pump-sediment"
+                d="M 220 184 C 180 215, 130 215, 107 245"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 8: Sediment Filter -> Activated Carbon */}
+              <path
+                id="path-sediment-carbon"
+                d="M 195 272 L 225 272"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 9: Activated Carbon -> UF / RO */}
+              <path
+                id="path-carbon-ufro"
+                d="M 400 272 L 430 272"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 10: UF / RO -> UV Disinfection */}
+              <path
+                id="path-ufro-uv"
+                d="M 605 272 L 635 272"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+
+              {/* Path 11: UV Disinfection -> Post-Treatment Sensors (Potable Water Stream) */}
+              <path
+                id="path-uv-postsensors"
+                d="M 722 299 C 722 360, 450 360, 400 405"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+              <g className="cursor-default">
+                <text x="560" y="352" fill="#94a3b8" fontSize="10" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Purified Potable Flow
+                </text>
+              </g>
+
+              {/* Path 12: Post-Treatment Sensors -> Dashboard (Dotted Feedback) */}
+              <path
+                id="path-postsensors-dashboard"
+                d="M 520 433 L 610 433"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                strokeDasharray="3 3"
+                markerEnd="url(#arrow-dashed)"
+              />
+              <g className="cursor-default">
+                <text x="565" y="423" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Effluent Validation Feed
+                </text>
+              </g>
+
+              {/* Path 13: Cloud Database -> Dashboard (Solid SSE Telemetry Feed) */}
+              <path
+                id="path-cloud-dashboard"
+                d="M 940 184 C 880 250, 760 320, 715 405"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+              <g className="cursor-default">
+                <text x="795" y="295" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Real-Time Data Hook
+                </text>
+              </g>
+
+              {/* Path 14: Cloud Database -> Alerts / Notifications */}
+              <path
+                id="path-cloud-alerts"
+                d="M 1030 184 C 1050 250, 1040 330, 1000 405"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.3"
+                markerEnd="url(#arrow)"
+              />
+              <g className="cursor-default">
+                <text x="1045" y="295" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Critical Violation Triggers
+                </text>
+              </g>
+
+              {/* =========================================================================
+                  LIVE TELEMETRY PULSE PARTICLES (Active when isSimulating is on)
+                  ========================================================================= */}
+              {isSimulating && (
+                <>
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="1.8s" repeatCount="indefinite" path="M 200 47 L 250 47" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="2.4s" repeatCount="indefinite" begin="0.3s" path="M 385 74 C 385 105, 310 100, 295 130" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="2.0s" repeatCount="indefinite" begin="0.4s" path="M 520 47 L 570 47" />
+                  </circle>
+
+                  <circle r="2.5" fill="#e2e8f0">
+                    <animateMotion dur="2.6s" repeatCount="indefinite" begin="0.7s" path="M 630 74 C 570 110, 450 110, 410 142" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="2.0s" repeatCount="indefinite" begin="0.5s" path="M 810 47 L 860 47" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="2.2s" repeatCount="indefinite" begin="0.8s" path="M 997 74 L 997 130" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="2.5s" repeatCount="indefinite" begin="0.8s" path="M 220 184 C 180 215, 130 215, 107 245" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="1.8s" repeatCount="indefinite" begin="1.2s" path="M 195 272 L 225 272" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="1.8s" repeatCount="indefinite" begin="1.4s" path="M 400 272 L 430 272" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="1.8s" repeatCount="indefinite" begin="1.6s" path="M 605 272 L 635 272" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="3.0s" repeatCount="indefinite" begin="1.9s" path="M 722 299 C 722 360, 450 360, 400 405" />
+                  </circle>
+
+                  <circle r="2.5" fill="#e2e8f0">
+                    <animateMotion dur="2.2s" repeatCount="indefinite" begin="2.4s" path="M 520 433 L 610 433" />
+                  </circle>
+
+                  <circle r="3" fill="#38bdf8" filter="url(#node-glow)">
+                    <animateMotion dur="3.0s" repeatCount="indefinite" begin="1.5s" path="M 940 184 C 880 250, 760 320, 715 405" />
+                  </circle>
+
+                  <circle r="3" fill="#f87171" filter="url(#node-glow)">
+                    <animateMotion dur="3.0s" repeatCount="indefinite" begin="1.7s" path="M 1030 184 C 1050 250, 1040 330, 1000 405" />
+                  </circle>
+                </>
+              )}
+
+              {/* =========================================================================
+                  DIAGRAM RECTANGULAR NODES (All 13 Topics from User's Specification)
+                  ========================================================================= */}
+
+              {/* 1. Water Source */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("water_source")}
+                onMouseEnter={() => setHoveredNodeId("water_source")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="20"
+                  y="20"
+                  width="180"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "water_source" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "water_source" || hoveredNodeId === "water_source" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "water_source" || hoveredNodeId === "water_source" ? "1.8" : "1"}
+                  filter={selectedTopicId === "water_source" || hoveredNodeId === "water_source" ? "url(#node-glow)" : undefined}
+                />
+                <text x="110" y="42" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  1. Water Source
+                </text>
+                <text x="110" y="58" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Raw Intake (65 PSI)
+                </text>
+              </g>
+
+              {/* 2. pH / Turbidity / TDS / Temperature Sensors */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("pre_sensors")}
+                onMouseEnter={() => setHoveredNodeId("pre_sensors")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="250"
+                  y="20"
+                  width="270"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "pre_sensors" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "pre_sensors" || hoveredNodeId === "pre_sensors" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "pre_sensors" || hoveredNodeId === "pre_sensors" ? "1.8" : "1"}
+                  filter={selectedTopicId === "pre_sensors" || hoveredNodeId === "pre_sensors" ? "url(#node-glow)" : undefined}
+                />
+                <text x="385" y="42" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  2. Pre-Treatment Sensors
+                </text>
+                <text x="385" y="58" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  pH · Turbidity · TDS · Temp
+                </text>
+              </g>
+
+              {/* 3. ESP32 / STM32 Controller */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("controller")}
+                onMouseEnter={() => setHoveredNodeId("controller")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="570"
+                  y="20"
+                  width="240"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "controller" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "controller" || hoveredNodeId === "controller" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "controller" || hoveredNodeId === "controller" ? "1.8" : "1"}
+                  filter={selectedTopicId === "controller" || hoveredNodeId === "controller" ? "url(#node-glow)" : undefined}
+                />
+                <text x="690" y="42" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  3. ESP32 / STM32 Controller
+                </text>
+                <text x="690" y="58" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Dual-Core Edge Compute
+                </text>
+              </g>
+
+              {/* 10. Communication — Wi-Fi / GSM / LoRa */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("communication")}
+                onMouseEnter={() => setHoveredNodeId("communication")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="860"
+                  y="20"
+                  width="275"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "communication" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "communication" || hoveredNodeId === "communication" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "communication" || hoveredNodeId === "communication" ? "1.8" : "1"}
+                  filter={selectedTopicId === "communication" || hoveredNodeId === "communication" ? "url(#node-glow)" : undefined}
+                />
+                <text x="997" y="42" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  10. Communication Uplink
+                </text>
+                <text x="997" y="58" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Wi-Fi · GSM · LoRa
+                </text>
+              </g>
+
+              {/* 4. Pump + Solenoid Valves */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("pump_valves")}
+                onMouseEnter={() => setHoveredNodeId("pump_valves")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="180"
+                  y="130"
+                  width="230"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "pump_valves" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "pump_valves" || hoveredNodeId === "pump_valves" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "pump_valves" || hoveredNodeId === "pump_valves" ? "1.8" : "1"}
+                  filter={selectedTopicId === "pump_valves" || hoveredNodeId === "pump_valves" ? "url(#node-glow)" : undefined}
+                />
+                <text x="295" y="152" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  4. Pump + Solenoid Valves
+                </text>
+                <text x="295" y="168" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Automated Flow Control
+                </text>
+              </g>
+
+              {/* 11. Cloud Database */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("cloud_database")}
+                onMouseEnter={() => setHoveredNodeId("cloud_database")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="895"
+                  y="130"
+                  width="205"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "cloud_database" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "cloud_database" || hoveredNodeId === "cloud_database" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "cloud_database" || hoveredNodeId === "cloud_database" ? "1.8" : "1"}
+                  filter={selectedTopicId === "cloud_database" || hoveredNodeId === "cloud_database" ? "url(#node-glow)" : undefined}
+                />
+                <text x="997" y="152" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  11. Cloud Database
+                </text>
+                <text x="997" y="168" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  TimescaleDB Telemetry Hub
+                </text>
+              </g>
+
+              {/* 5. Sediment Filter */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("sediment_filter")}
+                onMouseEnter={() => setHoveredNodeId("sediment_filter")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="20"
+                  y="245"
+                  width="175"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "sediment_filter" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "sediment_filter" || hoveredNodeId === "sediment_filter" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "sediment_filter" || hoveredNodeId === "sediment_filter" ? "1.8" : "1"}
+                  filter={selectedTopicId === "sediment_filter" || hoveredNodeId === "sediment_filter" ? "url(#node-glow)" : undefined}
+                />
+                <text x="107" y="267" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  5. Sediment Filter
+                </text>
+                <text x="107" y="283" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  5μm Particulates
+                </text>
+              </g>
+
+              {/* 6. Activated Carbon */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("activated_carbon")}
+                onMouseEnter={() => setHoveredNodeId("activated_carbon")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="225"
+                  y="245"
+                  width="175"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "activated_carbon" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "activated_carbon" || hoveredNodeId === "activated_carbon" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "activated_carbon" || hoveredNodeId === "activated_carbon" ? "1.8" : "1"}
+                  filter={selectedTopicId === "activated_carbon" || hoveredNodeId === "activated_carbon" ? "url(#node-glow)" : undefined}
+                />
+                <text x="312" y="267" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  6. Activated Carbon
+                </text>
+                <text x="312" y="283" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  CTO Adsorption &amp; Odor
+                </text>
+              </g>
+
+              {/* 7. UF / RO */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("uf_ro")}
+                onMouseEnter={() => setHoveredNodeId("uf_ro")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="430"
+                  y="245"
+                  width="175"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "uf_ro" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "uf_ro" || hoveredNodeId === "uf_ro" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "uf_ro" || hoveredNodeId === "uf_ro" ? "1.8" : "1"}
+                  filter={selectedTopicId === "uf_ro" || hoveredNodeId === "uf_ro" ? "url(#node-glow)" : undefined}
+                />
+                <text x="517" y="267" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  7. UF / RO
+                </text>
+                <text x="517" y="283" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Metals &amp; Dissolved Solids
+                </text>
+              </g>
+
+              {/* 8. UV Disinfection */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("uv_disinfection")}
+                onMouseEnter={() => setHoveredNodeId("uv_disinfection")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="635"
+                  y="245"
+                  width="175"
+                  height="54"
+                  rx="4"
+                  fill={selectedTopicId === "uv_disinfection" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "uv_disinfection" || hoveredNodeId === "uv_disinfection" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "uv_disinfection" || hoveredNodeId === "uv_disinfection" ? "1.8" : "1"}
+                  filter={selectedTopicId === "uv_disinfection" || hoveredNodeId === "uv_disinfection" ? "url(#node-glow)" : undefined}
+                />
+                <text x="722" y="267" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  8. UV Disinfection
+                </text>
+                <text x="722" y="283" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  254nm UV-C Germicidal
+                </text>
+              </g>
+
+              {/* 9. Post-Treatment Sensors */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("post_sensors")}
+                onMouseEnter={() => setHoveredNodeId("post_sensors")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="280"
+                  y="405"
+                  width="240"
+                  height="56"
+                  rx="4"
+                  fill={selectedTopicId === "post_sensors" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "post_sensors" || hoveredNodeId === "post_sensors" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "post_sensors" || hoveredNodeId === "post_sensors" ? "1.8" : "1"}
+                  filter={selectedTopicId === "post_sensors" || hoveredNodeId === "post_sensors" ? "url(#node-glow)" : undefined}
+                />
+                <text x="400" y="428" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  9. Post-Treatment Sensors
+                </text>
+                <text x="400" y="445" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Effluent Potability Validation
+                </text>
+              </g>
+
+              {/* 12. Dashboard */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("dashboard")}
+                onMouseEnter={() => setHoveredNodeId("dashboard")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="610"
+                  y="405"
+                  width="210"
+                  height="56"
+                  rx="4"
+                  fill={selectedTopicId === "dashboard" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "dashboard" || hoveredNodeId === "dashboard" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "dashboard" || hoveredNodeId === "dashboard" ? "1.8" : "1"}
+                  filter={selectedTopicId === "dashboard" || hoveredNodeId === "dashboard" ? "url(#node-glow)" : undefined}
+                />
+                <text x="715" y="428" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  12. Dashboard
+                </text>
+                <text x="715" y="445" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Real-Time Operator Console
+                </text>
+              </g>
+
+              {/* 13. Alerts / Notifications */}
+              <g
+                className="cursor-pointer transition-all duration-150"
+                onClick={() => setSelectedTopicId("alerts_notifications")}
+                onMouseEnter={() => setHoveredNodeId("alerts_notifications")}
+                onMouseLeave={() => setHoveredNodeId(null)}
+              >
+                <rect
+                  x="885"
+                  y="405"
+                  width="230"
+                  height="56"
+                  rx="4"
+                  fill={selectedTopicId === "alerts_notifications" ? "#1e293b" : "#161922"}
+                  stroke={selectedTopicId === "alerts_notifications" || hoveredNodeId === "alerts_notifications" ? "#38bdf8" : "#5b6577"}
+                  strokeWidth={selectedTopicId === "alerts_notifications" || hoveredNodeId === "alerts_notifications" ? "1.8" : "1"}
+                  filter={selectedTopicId === "alerts_notifications" || hoveredNodeId === "alerts_notifications" ? "url(#node-glow)" : undefined}
+                />
+                <text x="1000" y="428" fill="#f1f5f9" fontSize="11" fontWeight="500" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  13. Alerts / Notifications
+                </text>
+                <text x="1000" y="445" fill="#94a3b8" fontSize="9.5" fontFamily="system-ui, sans-serif" textAnchor="middle">
+                  Autonomous Escalation &amp; SMS
+                </text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          VIEW MODE 2: 13-STAGE SEQUENTIAL PIPELINE (Directly from User Screenshots)
+          ========================================================================= */}
+      {viewMode === "pipeline" && (
+        <Card className="p-4 md:p-8 bg-slate-900 border-slate-800 shadow-xl rounded-2xl">
+          <div className="max-w-4xl mx-auto">
+            <div className="relative pl-6 md:pl-10 space-y-6 before:absolute before:left-[21px] md:before:left-[35px] before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-700/60 before:border-l before:border-dashed before:border-slate-500/50">
+              {ARCHITECTURE_TOPICS.map((topic, i) => {
+                const IconComponent = topic.icon;
+                const isSelected = selectedTopicId === topic.id;
+
+                return (
+                  <div
+                    key={topic.id}
+                    onClick={() => setSelectedTopicId(topic.id)}
+                    className={`relative p-4 md:p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                      isSelected
+                        ? "bg-slate-800/90 border-blue-500 shadow-lg shadow-blue-500/10"
+                        : "bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60"
+                    }`}
+                  >
+                    {/* Floating Step Icon & Pin */}
+                    <div
+                      className={`absolute -left-[35px] md:-left-[51px] top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected
+                          ? "bg-blue-600 border-white text-white shadow-md shadow-blue-500/50 scale-110"
+                          : "bg-slate-900 border-slate-700 text-slate-300 group-hover:border-blue-500"
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4 md:w-5 md:h-5" />
+                    </div>
+
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-mono font-bold text-blue-400">
+                          #{topic.index.toString().padStart(2, "0")}
+                        </span>
+                        <h3 className="text-sm md:text-base font-bold text-white tracking-tight">
+                          {topic.title}
+                        </h3>
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                          {topic.category}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
+                        {topic.description}
+                      </p>
+                      <div className="text-[11px] font-mono text-slate-500 pt-1">
+                        Specs: <span className="text-slate-400">{topic.techSpecs}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center sm:flex-col items-start sm:items-end justify-between sm:justify-center gap-2 shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/80 text-emerald-300 border border-emerald-800/80">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        {topic.statusText}
+                      </span>
+                      {onNavigate && topic.page && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onNavigate(topic.page);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-blue-600/80 hover:bg-blue-500 text-white text-[11px] font-semibold flex items-center gap-1 transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          <span>Open</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* =========================================================================
+          INTERACTIVE TOPIC DETAIL DRAWER (When a topic is selected in either view)
+          ========================================================================= */}
+      {selectedTopic ? (
+        <Card className="p-5 md:p-6 bg-slate-900 border-slate-700 text-white shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-slate-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-900/60 text-blue-300 border border-blue-700/60">
+                  Topic #{selectedTopic.index}: {selectedTopic.category}
+                </span>
+                <span className="text-xs font-mono text-slate-400">{selectedTopic.codeRef}</span>
+              </div>
+              <h2 className="text-lg md:text-xl font-bold text-white tracking-tight mt-1.5">
+                {selectedTopic.title}
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              {onNavigate && selectedTopic.page && (
+                <button
+                  onClick={() => onNavigate(selectedTopic.page)}
+                  className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open {selectedTopic.pageLabel}</span>
+                </button>
+              )}
+              <button
+                onClick={() => setSelectedTopicId(null)}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors flex items-center gap-1.5"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Close</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2 space-y-3">
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Component Role &amp; Execution Purpose
+                </h4>
+                <p className="text-sm text-slate-300 leading-relaxed bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+                  {selectedTopic.description}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Technical Specifications &amp; Hardware Benchmark
+                </h4>
+                <div className="text-xs text-slate-300 font-mono bg-slate-950/60 p-3 rounded-xl border border-slate-800 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
+                  <span>{selectedTopic.techSpecs}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Input Stream / Dependencies
+                </h4>
+                <ul className="space-y-1 text-xs text-slate-300 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+                  {selectedTopic.inputs.map((inp) => (
+                    <li key={inp} className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                      <span>{inp}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Output Deliverables / Actions
+                </h4>
+                <ul className="space-y-1 text-xs text-slate-300 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+                  {selectedTopic.outputs.map((out) => (
+                    <li key={out} className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                      <span>{out}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        /* Legend & Pipeline Summary when no node is selected */
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <Card className="p-3.5 bg-slate-900 border-slate-800 text-slate-300 flex items-start gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 shrink-0" />
+            <div>
+              <span className="font-semibold text-white block">Physical Water Pipeline</span>
+              <span className="text-slate-400 text-[11px]">Water Source ➔ Pre-Sensors ➔ Pump ➔ Sediment ➔ Carbon ➔ RO ➔ UV ➔ Post-Sensors.</span>
+            </div>
+          </Card>
+
+          <Card className="p-3.5 bg-slate-900 border-slate-800 text-slate-300 flex items-start gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
+            <div>
+              <span className="font-semibold text-white block">Edge Telemetry &amp; Control</span>
+              <span className="text-slate-400 text-[11px]">ESP32 / STM32 controller sequences booster pumps &amp; solenoid valves.</span>
+            </div>
+          </Card>
+
+          <Card className="p-3.5 bg-slate-900 border-slate-800 text-slate-300 flex items-start gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+            <div>
+              <span className="font-semibold text-white block">Cloud &amp; Incident Dispatch</span>
+              <span className="text-slate-400 text-[11px]">Wi-Fi / GSM / LoRa uplinks to Cloud Database, live Dashboard &amp; Alert Notifications.</span>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
@@ -1571,7 +2742,7 @@ export default function App() {
             {activePage === "filters" && <FilterHealthPage />}
             {activePage === "devices" && <DevicesPage />}
             {activePage === "energy" && <EnergyPage dataMode={dataMode} />}
-            {activePage === "architecture" && <ArchitecturePage />}
+            {activePage === "architecture" && <ArchitecturePage onNavigate={setActivePage} />}
             {activePage === "project" && <ProjectInfoPage />}
             {activePage === "settings" && <SettingsPage dataMode={dataMode} setDataMode={setDataMode} />}
           </main>
