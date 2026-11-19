@@ -48,8 +48,8 @@
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd "AquaPulse React"
+git clone https://github.com/Muhammad-Adil-14912/AquaPulse.git
+cd AquaPulse
 
 # Install dependencies
 npm install
