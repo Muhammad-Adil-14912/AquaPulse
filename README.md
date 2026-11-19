@@ -73,3 +73,7 @@ The output will be in the `dist/` directory, ready to deploy.
 ## 👥 Authors & Team
 - **Project:** Aqua Pulse (IntelliSched AI)
 - **SIH 2026**
+
+## Prototype and telemetry status
+
+The current dashboard includes demonstration/simulation data and simulated device states. Unless a hardware or backend integration is configured separately, displayed readings, alerts, filter-health values, and device locations are not live measurements from physical sensors. Do not use this demo to make drinking-water safety decisions. Potability must be established through calibrated instruments and accredited laboratory testing against applicable BIS/WHO guidance. The project description is an intended architecture, not a certification claim.
