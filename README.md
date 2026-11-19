@@ -41,7 +41,7 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18 or higher recommended)
+- Node.js 20.19+ or 22.12+
 - npm or yarn
 
 ### Installation
